@@ -5,7 +5,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 # Install Java (OpenJDK 17 - available in Debian 11)
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends openjdk-17-jre-headless procps bash && \
+    apt-get install -y --no-install-recommends openjdk-21-jre-headless procps bash && \
     rm -rf /var/lib/apt/lists/* && \
     ln -sf /bin/bash /bin/sh
     
