@@ -1,0 +1,120 @@
+version: '3.8'
+
+services:
+  # ML Pipeline Service
+  ml-pipeline:
+    build: .
+    container_name: ml_pipeline
+    hostname: ml-pipeline
+    ports:
+      - "8888:8888"  # JupyterLab
+      - "4040:4040"  # Spark UI
+    volumes:
+      - .:/app
+      - ./data:/app/data
+      - ./datamart:/app/datamart
+      - airflow-logs:/opt/airflow/logs
+    environment:
+      - JUPYTER_ENABLE_LAB=yes
+      - PYTHONPATH=/app
+      - SPARK_HOME=/usr/local/lib/python3.12/site-packages/pyspark
+    command: ["jupyter", "lab", "--ip=0.0.0.0", "--port=8888", "--no-browser", "--allow-root", "--notebook-dir=/app", "--ServerApp.token=''", "--ServerApp.disable_check_xsrf=True"]
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8888"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - ml-network
+    restart: unless-stopped
+
+  # Airflow Services (optional)
+  airflow-webserver:
+    build: .
+    container_name: airflow_webserver
+    hostname: airflow-webserver
+    ports:
+      - "8080:8080"
+    volumes:
+      - .:/app
+      - ./dags:/opt/airflow/dags
+      - ./datamart:/app/datamart
+      - airflow-logs:/opt/airflow/logs
+      - airflow-plugins:/opt/airflow/plugins
+      - airflow-db:/opt/airflow
+    environment:
+      - AIRFLOW__CORE__EXECUTOR=SequentialExecutor
+      - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=sqlite:////opt/airflow/airflow.db
+      - AIRFLOW__CORE__DAGS_FOLDER=/opt/airflow/dags
+      - AIRFLOW__WEBSERVER__EXPOSE_CONFIG=True
+      - AIRFLOW__CORE__LOAD_EXAMPLES=False
+      - AIRFLOW__LOGGING__LOGGING_LEVEL=INFO
+      - AIRFLOW__LOGGING__BASE_LOG_FOLDER=/opt/airflow/logs
+      - AIRFLOW__LOGGING__DAG_PROCESSOR_MANAGER_LOG_LOCATION=/opt/airflow/logs/dag_processor_manager/dag_processor_manager.log
+      - AIRFLOW__LOGGING__REMOTE_LOGGING=False
+    command: >
+      bash -c "airflow db init &&
+               airflow users create --username admin --firstname Admin --lastname User --role Admin --email admin@example.com --password admin &&
+               airflow webserver"
+    depends_on:
+      ml-pipeline:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    networks:
+      - ml-network
+    restart: unless-stopped
+
+  # Airflow Scheduler
+  airflow-scheduler:
+    build: .
+    container_name: airflow_scheduler
+    hostname: airflow-scheduler
+    volumes:
+      - .:/app
+      - ./dags:/opt/airflow/dags
+      - ./datamart:/app/datamart
+      - airflow-logs:/opt/airflow/logs
+      - airflow-plugins:/opt/airflow/plugins
+      - airflow-db:/opt/airflow
+    environment:
+      - AIRFLOW__CORE__EXECUTOR=SequentialExecutor
+      - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=sqlite:////opt/airflow/airflow.db
+      - AIRFLOW__CORE__DAGS_FOLDER=/opt/airflow/dags
+      - AIRFLOW__LOGGING__LOGGING_LEVEL=INFO
+      - AIRFLOW__LOGGING__BASE_LOG_FOLDER=/opt/airflow/logs
+      - AIRFLOW__LOGGING__REMOTE_LOGGING=False
+    command: airflow scheduler
+    depends_on:
+      airflow-webserver:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "airflow jobs check --job-type SchedulerJob --hostname airflow-scheduler"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    networks:
+      - ml-network
+    restart: unless-stopped
+
+networks:
+  ml-network:
+    driver: bridge
+    name: ml-network
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
+
+volumes:
+  airflow-logs:
+    driver: local
+  airflow-plugins:
+    driver: local
+  airflow-db:
+    driver: local

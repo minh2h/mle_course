@@ -1,0 +1,113 @@
+{
+  "timestamp": "2025-11-11T13:19:05.550348",
+  "current_data_path": "datamart/gold/OOT1/feature_store.parquet",
+  "current_data_shape": [
+    1541,
+    18
+  ],
+  "reference_data_shape": [
+    8974,
+    18
+  ],
+  "data_quality": {
+    "status": "OK",
+    "total_rows": 1541,
+    "missing_values": 298,
+    "missing_percentage": 1.07,
+    "columns": 18
+  },
+  "psi_drift_results": {
+    "psi_results": {
+      "Num_of_Delayed_Payment": {
+        "psi": 0.014584131622688307,
+        "drift_detected": false,
+        "threshold": 0.1
+      },
+      "Num_Bank_Accounts": {
+        "psi": 0.008865722084723747,
+        "drift_detected": false,
+        "threshold": 0.1
+      },
+      "Num_of_Loan": {
+        "psi": 0.010325840477756552,
+        "drift_detected": false,
+        "threshold": 0.1
+      },
+      "Age": {
+        "psi": 0.011187619491797746,
+        "drift_detected": false,
+        "threshold": 0.1
+      },
+      "Outstanding_Debt": {
+        "psi": 0.006442779406508453,
+        "drift_detected": false,
+        "threshold": 0.1
+      },
+      "Credit_Mix_encoded": {
+        "psi": 0.0010751091106360364,
+        "drift_detected": false,
+        "threshold": 0.1
+      },
+      "Interest_Rate": {
+        "psi": 0.007122752925979738,
+        "drift_detected": false,
+        "threshold": 0.1
+      },
+      "Delay_from_due_date": {
+        "psi": 0.001839761168506039,
+        "drift_detected": false,
+        "threshold": 0.1
+      },
+      "EMI_Burden_Ratio": {
+        "psi": 0.039543614249796216,
+        "drift_detected": false,
+        "threshold": 0.1
+      },
+      "Monthly_Balance": {
+        "psi": 0.0015515797281080886,
+        "drift_detected": false,
+        "threshold": 0.1
+      },
+      "Num_Credit_Card": {
+        "psi": 0.021959473569176997,
+        "drift_detected": false,
+        "threshold": 0.1
+      },
+      "Monthly_Inhand_Salary": {
+        "psi": 0.008159139285583813,
+        "drift_detected": false,
+        "threshold": 0.1
+      },
+      "Total_EMI_per_month": {
+        "psi": 0.005498614245942732,
+        "drift_detected": false,
+        "threshold": 0.1
+      },
+      "Credit_Utilization_Ratio": {
+        "psi": 0.023625700787803225,
+        "drift_detected": false,
+        "threshold": 0.1
+      },
+      "Debt_to_Income_Ratio": {
+        "psi": 0.007757012137245187,
+        "drift_detected": false,
+        "threshold": 0.1
+      },
+      "Annual_Income": {
+        "psi": 0.011564362013260561,
+        "drift_detected": false,
+        "threshold": 0.1
+      }
+    },
+    "drift_detected": false,
+    "summary": {
+      "total_features_analyzed": 16,
+      "numeric_features": 16,
+      "features_with_drift": 0,
+      "drift_percentage": 0.0
+    }
+  },
+  "alerts": [],
+  "status": "OK",
+  "output_directory": "datamart/gold/monitoring_report/monitoring_20251111_131905"
+}

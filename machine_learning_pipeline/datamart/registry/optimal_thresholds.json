@@ -1,0 +1,6 @@
+{
+  "random_forest": 0.7,
+  "gradient_boosting": 0.7,
+  "logistic_regression": 0.7,
+  "svm": 0.7
+}

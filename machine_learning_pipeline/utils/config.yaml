@@ -1,0 +1,127 @@
+# ML Pipeline Configuration
+model:
+  random_state: 42
+  test_size: 0.2
+  validation_split: 0.2
+  target_column: "Credit_Score"
+  cv_folds: 5
+  metric: "roc_auc"
+  
+data:
+  feature_store_path: 'datamart/gold/training/feature_store.parquet'
+  label_store_path: 'datamart/gold/training/label_store.parquet'
+  oot1_path: 'datamart/gold/OOT1'
+  oot2_path: 'datamart/gold/OOT2'
+  predictions_training: "datamart/predictions_training.csv"
+  predictions_test: "datamart/predictions_test.csv"
+  predictions_oot1: "datamart/predictions_oot1.csv"
+  predictions_oot2: "datamart/predictions_oot2.csv"
+  
+artifacts:
+  model_path: 'datamart/artifacts/'
+  registry_path: 'datamart/registry/'
+  predictions_path: 'datamart/predictions/'
+  reports_path: 'datamart/gold/monitoring_report/'
+  logs_path: 'datamart/logs/'
+  imputer_path: 'datamart/artifacts/'
+  
+# Advanced Data Imputation Configuration
+imputation:
+  # Default strategies
+  numeric_strategy: "median"  # Options: 'mean', 'median', 'knn', 'iterative'
+  categorical_strategy: "most_frequent"  # Options: 'most_frequent', 'constant'
+  
+  # Advanced imputation parameters
+  knn_neighbors: 5
+  iterative_max_iter: 10
+  missing_threshold: 0.5  # Drop features with >50% missing values
+  
+  # Feature-specific imputation strategies
+  feature_specific:
+    # Demographic features
+    Age: "median"
+    
+    # Financial features
+    Annual_Income: "iterative"  # Use iterative imputer for income (correlated with other features)
+    Monthly_Inhand_Salary: "iterative"
+    Outstanding_Debt: "median"
+    Total_EMI_per_month: "median"
+    Monthly_Balance: "median"
+    Debt_to_Income_Ratio: "median"
+    EMI_Burden_Ratio: "median"
+    
+    # Credit-related features
+    Interest_Rate: "median"
+    Credit_Utilization_Ratio: "median"
+    
+    # Count features (should be non-negative integers)
+    Num_of_Loan: "median"
+    Num_Credit_Card: "median"
+    Num_Bank_Accounts: "median"
+    Num_of_Delayed_Payment: "median"
+    Delay_from_due_date: "median"
+    
+    # Categorical features
+    Credit_Mix_encoded: "most_frequent"
+    
+  # Data quality rules
+  data_quality:
+    # Age constraints
+    age_min: 18
+    age_max: 120
+    
+    # Income constraints (minimum reasonable values)
+    min_annual_income: 1000
+    min_monthly_salary: 100
+    
+    # Count constraints (non-negative)
+    non_negative_features:
+      - "Num_of_Loan"
+      - "Num_Credit_Card"
+      - "Num_Bank_Accounts"
+      - "Num_of_Delayed_Payment"
+      - "Annual_Income"
+      - "Monthly_Inhand_Salary"
+      - "Outstanding_Debt"
+      - "Total_EMI_per_month"
+    
+    # Masked value patterns to detect and convert to NaN
+    masked_patterns:
+      - "#F%$D@*&8"  # Masked SSN pattern
+      - "_______"    # Masked occupation
+      - "___"
+      - "NULL"
+      - "null"
+      - "N/A"
+      - "n/a"
+      - "?"
+      - "-"
+      - "Unknown"
+      - "unknown"
+      - ""           # Empty string
+      - " "          # Single space
+
+monitoring:
+  missing_values_threshold: 0.05  # Alert if >5% missing values (more strict)
+  drift_threshold: 0.1
+  psi_threshold: 0.1
+  
+  # Data drift detection
+  drift_detection:
+    psi_threshold: 0.1
+    statistical_tests: true
+    feature_importance_threshold: 0.01
+  
+  # Report generation
+  reports:
+    generate_plots: true
+    plot_formats: ["png"]
+    include_distributions: true
+    include_correlations: true
+  
+logging:
+  level: 'INFO'
+  format: '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+  file: "datamart/logs/ml_pipeline.log"
+  max_file_size: "10MB"
+  backup_count: 5
